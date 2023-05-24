@@ -1,0 +1,56 @@
+import serial
+import pandas as pd
+from oauth2client.service_account import ServiceAccountCredentials
+from gspread_dataframe import set_with_dataframe
+import httplib2
+from googleapiclient.discovery import build
+import time
+import csv
+from datetime import datetime
+
+#user_input=input("How much money would you like to deposit?  ")
+
+# Open the serial connection
+arduino_port = 'COM7'  # Replace with the appropriate port
+baud_rate = 9600  # Set according to your Arduino program
+ser = serial.Serial(arduino_port, baud_rate)
+
+# Counter variable to keep track of the lines
+line_count = 0
+
+# Variables to store the first two lines of data
+first_line = ""
+second_line = ":"
+
+
+while True:
+    if ser.inWaiting() > 0:
+        # Read data from Arduino
+        data = ser.readline().decode().strip()
+
+        # Increment the line count
+        line_count += 1
+
+        # Store the data based on the line count
+        if line_count == 1:
+            first_line = data
+        elif line_count == 2:
+            second_line = data
+            break  # Exit the loop after capturing the second li
+
+# Define the data to be added
+new_data = ['Acount Number: ' ,second_line, '      Date: ',datetime.now(), '       Amount:' ,'3000']
+
+# Specify the path to the CSV file
+csv_file_path = 'Money_Transfer.csv'
+
+# Open the CSV file in append mode
+with open(csv_file_path, 'a', newline='') as file:
+    # Create a CSV writer object
+    writer = csv.writer(file)
+
+    # Write the new data to the CSV file
+    writer.writerow(new_data)
+
+print("Deposit has been successful.")
+
